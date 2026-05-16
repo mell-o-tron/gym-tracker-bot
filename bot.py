@@ -114,8 +114,14 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             rows = list(reader)
 
         categories, values = compute_volume_per_muscle_group(rows)
+
         argmin = values[:-1].index(min(values[:-1]))
-        make_star_plot(categories, values)
+
+        if values[-1] == 0:
+            make_star_plot(categories[:-1], values[:-1])
+        else:
+            make_star_plot(categories, values)
+
         await update.message.reply_photo(
             photo="plot.png",
             caption=f"Here's your volume stats! Gotta work on your {categories[argmin]} some more..."
