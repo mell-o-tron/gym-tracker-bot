@@ -49,6 +49,17 @@ async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         args = context.args
         # args are: exercise, reps, weight
         if(len(args) == 3):
+
+            if (args[2] == "bw"):
+                with open('bw_mell-o-tron.csv', 'r', newline='') as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+                    if(len(rows) == 0):
+                        await update.message.reply_text("No weight measurement found, using default of 65kg")
+                        args[2] = "65"
+                    else:
+                        args[2] = f"{rows[-1][0]}"
+
             with open('mell-o-tron.csv', 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerows([
@@ -57,6 +68,26 @@ async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 await update.message.reply_text("Added")
         else:
             await update.message.reply_text("Format is: exercise name (no spaces), reps, weight")
+    else:
+        await update.message.reply_text("Sorry, this bot can currently only be used by mello :)")
+
+
+async def add_weight(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a message when the command /help is issued."""
+    user = update.effective_user
+    if(user.username == "mell_o_tron"):
+        args = context.args
+        # args are: exercise, reps, weight
+        if(len(args) == 1):
+
+            with open('bw_mell-o-tron.csv', 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerows([
+                    [args[0], datetime.datetime.now()]
+                ])
+                await update.message.reply_text("Added")
+        else:
+            await update.message.reply_text("Format is: weight")
     else:
         await update.message.reply_text("Sorry, this bot can currently only be used by mello :)")
 
@@ -148,6 +179,7 @@ def main() -> None:
     application.add_handler(CommandHandler("history", history_command))
     application.add_handler(CommandHandler("csv", csv_command))
     application.add_handler(CommandHandler("stats", stats_command))
+    application.add_handler(CommandHandler("bw", add_weight))
 
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))

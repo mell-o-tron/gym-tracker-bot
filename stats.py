@@ -31,6 +31,12 @@ def compute_volume_per_muscle_group(rows):
             legs += (float(r[1]) * float(r[2]))
         elif r[0].startswith("leg"):
             legs += (float(r[1]) * float(r[2]))
+        elif r[0].startswith("pushup"):
+            vol = (float(r[1]) * float(r[2]))
+            # idk I am completely inventing these numbers, but they sound ok
+            chest += vol * .75
+            triceps += vol * .25
+            abss += vol * .25
         else:
             other += (float(r[1]) * float(r[2]))
 
