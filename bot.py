@@ -161,6 +161,29 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     else:
         await update.message.reply_text("Sorry, this bot can currently only be used by mello :)")
 
+async def view_target(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send a message when the command /help is issued."""
+    user = update.effective_user
+    if(user.username == "mell_o_tron"):
+        args = context.args
+        # args are: exercise, reps, weight
+        with open('mell-o-tron.csv', 'r', newline='') as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+
+        categories, target_values = compute_target_volume(rows)
+        categories, week_values = compute_volume_per_muscle_group_week(rows)
+
+        make_target_plot(categories, week_values, target_values)
+
+        await update.message.reply_photo(
+            photo="plot.png",
+            caption=f"Here's your weekly volume stats!"
+        )
+
+    else:
+        await update.message.reply_text("Sorry, this bot can currently only be used by mello :)")
+
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Echo the user message."""
     await update.message.reply_text(update.message.text)
@@ -180,6 +203,7 @@ def main() -> None:
     application.add_handler(CommandHandler("csv", csv_command))
     application.add_handler(CommandHandler("stats", stats_command))
     application.add_handler(CommandHandler("bw", add_weight))
+    application.add_handler(CommandHandler("target", view_target))
 
     # on non command i.e message - echo the message on Telegram
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
