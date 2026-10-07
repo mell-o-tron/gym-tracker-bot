@@ -24,8 +24,6 @@ def compute_volume_per_muscle_group(rows):
             back += (float(r[1]) * float(r[2]))
         elif r[0].startswith("back"):
             back += (float(r[1]) * float(r[2]))
-        elif r[0].startswith("row"):
-            back += (float(r[1]) * float(r[2]))
         elif r[0].startswith("abs"):
             abss += (float(r[1]) * float(r[2]))
         elif r[0].startswith("squat"):
@@ -35,9 +33,25 @@ def compute_volume_per_muscle_group(rows):
         elif r[0].startswith("pushup"):
             vol = (float(r[1]) * float(r[2]))
             # idk I am completely inventing these numbers, but they sound ok
-            chest += vol * .75
+            chest += vol * .5
             triceps += vol * .25
             abss += vol * .25
+        elif r[0].startswith("rowing"):
+            watts   = float(r[1])
+            time    = float(r[2])
+            joules  = watts * time
+            # suppose one rep is displacing 1kg by 1m
+            # joules is kg*m^2*s^{-2}, divide by g m*s^{-2} obtain kg*m
+            # this is of course completely fucking bonkers and has no physiological significance whatsoever
+            # but it gives me a number, and a number makes me happy :)
+            vol     = joules / 9.81
+            legs += vol * .6
+            biceps += vol * .1
+            back += vol * .2
+            abss += vol * .1
+
+        elif r[0].startswith("row"):
+            back += (float(r[1]) * float(r[2]))
         else:
             other += (float(r[1]) * float(r[2]))
 
