@@ -2,6 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 
+def rowing_approx(watts, time):
+    joules  = watts * time
+    # suppose one rep is displacing 1kg by 1m
+    # joules is kg*m^2*s^{-2}, divide by g m*s^{-2} obtain kg*m
+    # this is of course completely fucking bonkers and has no physiological significance whatsoever
+    # but it gives me a number, and a number makes me happy :)
+    vol     = joules / 9.81
+    return vol
+    
+
 def compute_volume_per_muscle_group(rows):
     chest = 0
     biceps = 0
@@ -39,12 +49,7 @@ def compute_volume_per_muscle_group(rows):
         elif r[0].startswith("rowing"):
             watts   = float(r[1])
             time    = float(r[2])
-            joules  = watts * time
-            # suppose one rep is displacing 1kg by 1m
-            # joules is kg*m^2*s^{-2}, divide by g m*s^{-2} obtain kg*m
-            # this is of course completely fucking bonkers and has no physiological significance whatsoever
-            # but it gives me a number, and a number makes me happy :)
-            vol     = joules / 9.81
+            vol     = rowing_approx(watts, time)
             legs += vol * .6
             biceps += vol * .1
             back += vol * .2
@@ -79,6 +84,11 @@ def compute_n_ex_per_muscle_group(rows):
             back += 1
         elif r[0].startswith("back"):
             back += 1
+        elif r[0].startswith("rowing"):
+            legs += .6
+            biceps += .1
+            back += .2
+            abss += .1
         elif r[0].startswith("row"):
             back += 1
         elif r[0].startswith("abs"):
@@ -90,7 +100,7 @@ def compute_n_ex_per_muscle_group(rows):
         elif r[0].startswith("pushup"):
             vol = 1
             # idk I am completely inventing these numbers, but they sound ok
-            chest += vol * .75
+            chest += vol * .5
             triceps += vol * .25
             abss += vol * .25
         else:
@@ -134,6 +144,13 @@ def compute_volume_per_muscle_group_week(rows):
             back += (float(r[1]) * float(r[2])) if is_in_current_week(datetime.datetime.strptime(r[3], "%Y-%m-%d %H:%M:%S.%f")) else 0
         elif r[0].startswith("back"):
             back += (float(r[1]) * float(r[2])) if is_in_current_week(datetime.datetime.strptime(r[3], "%Y-%m-%d %H:%M:%S.%f")) else 0
+        elif r[0].startswith("rowing"):
+            vol     = rowing_approx(float(r[1]), float(r[2])) if is_in_current_week(datetime.datetime.strptime(r[3], "%Y-%m-%d %H:%M:%S.%f")) else 0
+            legs += vol * .6
+            biceps += vol * .1
+            back += vol * .2
+            abss += vol * .1
+            
         elif r[0].startswith("row"):
             back += (float(r[1]) * float(r[2])) if is_in_current_week(datetime.datetime.strptime(r[3], "%Y-%m-%d %H:%M:%S.%f")) else 0
         elif r[0].startswith("abs"):
@@ -148,6 +165,7 @@ def compute_volume_per_muscle_group_week(rows):
             chest += vol * .75
             triceps += vol * .25
             abss += vol * .25
+
         else:
             other += (float(r[1]) * float(r[2])) if is_in_current_week(datetime.datetime.strptime(r[3], "%Y-%m-%d %H:%M:%S.%f")) else 0
 
